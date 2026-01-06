@@ -1,19 +1,10 @@
 <?php
 // [1. DB 연결 설정]
-$host = 'localhost'; 
-$user = 'griffhq';   
-$pass = 'Good121930!@';   
-$dbName = 'griffhq'; 
-
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$dbName;charset=utf8", $user, $pass);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("DB Connection Error: " . $e->getMessage());
-}
+require_once $_SERVER['DOCUMENT_ROOT'] . '/inc/db_connect.php'; // DB 연결 공통 파일 사용 권장 (또는 기존 코드 유지)
+require_once $_SERVER['DOCUMENT_ROOT'] . '/inc/secrets.php'; // ★ 비밀 설정 로드
 
 // [2. Google reCAPTCHA 검증]
-$recaptcha_secret = "6Ldo0j0sAAAAABUeuYZIzYVIrST7EtjzZkoo4bev"; 
+$recaptcha_secret = RECAPTCHA_SECRET_KEY; // ★ 상수 사용
 $recaptcha_response = $_POST['g-recaptcha-response'];
 
 if (empty($recaptcha_response)) {
@@ -57,6 +48,13 @@ $subject = "홈페이지 프로젝트 문의 (" . $name . ")";
 $ip_address = $_SERVER['REMOTE_ADDR'];
 
 // [4. DB 입력]
+// (만약 위에서 db_connect.php를 안 썼다면 기존 PDO 연결 코드 사용)
+if (!isset($conn)) {
+    $host = 'localhost'; $user = 'griffhq'; $pass = 'Good121930!@'; $dbName = 'griffhq'; 
+    try { $conn = new PDO("mysql:host=$host;dbname=$dbName;charset=utf8", $user, $pass); } 
+    catch(PDOException $e) { die("DB Error"); }
+}
+
 $sql = "INSERT INTO inquiries (name, email, phone, company, subject, message, status, ip_address, created_at) 
         VALUES (:name, :email, :phone, :company, :subject, :message, 'new', :ip_address, NOW())";
 
@@ -72,15 +70,11 @@ try {
         ':ip_address' => $ip_address
     ]);
 
-    // -------------------------------------------------------------
-    // [NEW] 1. 고객에게 접수 확인 문자 발송 (알리고)
-    // -------------------------------------------------------------
+    // 1. 고객에게 접수 확인 문자 (알리고)
     $sms_msg = "[그리프] 안녕하세요 {$name}님.\n보내주신 프로젝트 문의가 정상적으로 접수되었습니다.\n\n담당자가 내용 확인 후 빠르게 연락드리겠습니다.\n\n그리프에 관심을 가져주셔서 진심으로 감사드립니다.";
     sendAligoSMS($phone, $name, $sms_msg);
 
-    // -------------------------------------------------------------
-    // [NEW] 2. 슬랙 알림 발송 (관리자용)
-    // -------------------------------------------------------------
+    // 2. 슬랙 알림 (관리자용)
     sendSlackNotification($name, $phone, $email, $budget, $raw_message);
 
     echo "<script>
@@ -89,33 +83,23 @@ try {
     </script>";
 
 } catch(PDOException $e) {
-    echo "<script>
-        alert('시스템 오류가 발생했습니다.\\n" . addslashes($e->getMessage()) . "');
-        history.back();
-    </script>";
+    echo "<script>alert('Error: " . addslashes($e->getMessage()) . "'); history.back();</script>";
 }
 
 // =================================================================
-// [함수 1] 알리고 SMS 발송 함수
+// [함수] 알리고 SMS (secrets.php 상수 사용)
 // =================================================================
 function sendAligoSMS($receiver, $destination, $msg) {
-    // 알리고 계정 정보 (이전 설정값 적용)
-    $sms_config = [
-        'userid' => 'griff261',
-        'key'    => '5o4amu1n07weck1mof53q9lc026fwkvu',
-        'sender' => '02-326-3701',
-    ];
-
     $sms_url = "https://apis.aligo.in/send/"; 
-    $receiver = str_replace("-", "", $receiver); // 하이픈 제거
+    $receiver = str_replace("-", "", $receiver);
 
     $_POST_DATA = [
-        'key'      => $sms_config['key'],
-        'userid'   => $sms_config['userid'],
-        'sender'   => $sms_config['sender'],
+        'key'      => ALIGO_API_KEY,    // ★ 상수 사용
+        'userid'   => ALIGO_USER_ID,    // ★ 상수 사용
+        'sender'   => ALIGO_SENDER,     // ★ 상수 사용
         'receiver' => $receiver,
         'msg'      => $msg,
-        'msg_type' => 'LMS' // 내용이 길 수 있으므로 LMS로 설정
+        'msg_type' => 'LMS'
     ];
 
     $ch = curl_init();
@@ -124,34 +108,30 @@ function sendAligoSMS($receiver, $destination, $msg) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST_DATA);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    
-    $response = curl_exec($ch);
+    curl_exec($ch);
     curl_close($ch);
 }
 
 // =================================================================
-// [함수 2] 슬랙 알림 발송 함수
+// [함수] 슬랙 알림 (secrets.php 상수 사용)
 // =================================================================
 function sendSlackNotification($name, $phone, $email, $budget, $message) {
-    // ⚠️ 슬랙 웹훅 URL
-    $webhook_url = "https://hooks.slack.com/services/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";
+    $webhook_url = SLACK_WEBHOOK_CONTACT; // ★ 상수 사용
 
     $payload = [
         "text" => "📨 *새로운 프로젝트 문의가 도착했습니다!*",
-        "attachments" => [
-            [
-                "color" => "#0D4097", // 브랜드 컬러 (네이비)
-                "fields" => [
-                    ["title" => "성함", "value" => $name, "short" => true],
-                    ["title" => "연락처", "value" => $phone, "short" => true],
-                    ["title" => "이메일", "value" => $email, "short" => true],
-                    ["title" => "예산 범위", "value" => $budget, "short" => true],
-                    ["title" => "문의 내용", "value" => $message, "short" => false]
-                ],
-                "footer" => "Griff Studio Website Contact",
-                "ts" => time()
-            ]
-        ]
+        "attachments" => [[
+            "color" => "#0D4097",
+            "fields" => [
+                ["title" => "성함", "value" => $name, "short" => true],
+                ["title" => "연락처", "value" => $phone, "short" => true],
+                ["title" => "이메일", "value" => $email, "short" => true],
+                ["title" => "예산 범위", "value" => $budget, "short" => true],
+                ["title" => "문의 내용", "value" => $message, "short" => false]
+            ],
+            "footer" => "Griff Studio Website Contact",
+            "ts" => time()
+        ]]
     ];
 
     $ch = curl_init($webhook_url);
@@ -159,8 +139,6 @@ function sendSlackNotification($name, $phone, $email, $budget, $message) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    
-    // 전송 실행
     curl_exec($ch);
     curl_close($ch);
 }
