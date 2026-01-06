@@ -17,6 +17,9 @@ if (file_exists("$root/inc/front_db_connect.php")) {
     include "../inc/db_connect.php";
 }
 
+// ★ [추가] 비밀 설정 파일 로드 (슬랙/알리고 키값)
+require_once "$root/inc/secrets.php";
+
 // [3] 요청 데이터 확인
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo "<script>alert('잘못된 접근입니다.'); location.href='/';</script>";
@@ -31,7 +34,7 @@ if ($booking_id <= 0) {
     exit;
 }
 
-// [4] 기존 예약 정보 조회 (권한 확인용)
+// [4] 기존 예약 정보 조회
 $sql_info = "SELECT * FROM studio_bookings WHERE id = ?";
 $stmt_info = $conn->prepare($sql_info);
 $stmt_info->bind_param("i", $booking_id);
@@ -43,7 +46,7 @@ if (!$booking) {
     exit; 
 }
 
-// 세션 권한 체크
+// 권한 체크
 if (empty($_SESSION['client_email']) || $booking['client_email'] !== $_SESSION['client_email']) {
      echo "<script>alert('세션이 만료되었습니다. 다시 조회해주세요.'); location.href='/studio/studio_check.php';</script>";
      exit;
@@ -103,11 +106,10 @@ if ($mode === 'update') {
     $options_str = empty($raw_equipment) ? '선택 없음' : implode(', ', $raw_equipment);
 
     // ★ [중요] 수정 시 중복 예약 서버단 검증
-    // 조건: (상태가 대기/확정) AND (기간 겹침) AND (내 예약 ID는 제외)
     $chk_sql = "SELECT count(*) FROM studio_bookings 
                 WHERE status IN ('pending', 'confirmed') 
                 AND start_date < ? AND end_date > ? 
-                AND id != ?"; // ★ 내 예약은 제외하고 체크해야 함
+                AND id != ?"; // 내 예약은 제외
     
     if($chk_stmt = $conn->prepare($chk_sql)) {
         $chk_stmt->bind_param("ssi", $end_date, $start_date, $booking_id);
@@ -160,10 +162,11 @@ if ($mode === 'update') {
 }
 
 // -----------------------------------------------------------------
-// [함수] 슬랙 알림
+// [함수] 슬랙 알림 (secrets.php 상수 사용)
 // -----------------------------------------------------------------
 function sendSlackNotification($type, $name, $comp, $id, $pkg, $date, $opts = '-') {
-    $webhook_url = "https://hooks.slack.com/services/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"; 
+    // ★ secrets.php에 정의된 상수 사용
+    $webhook_url = SLACK_WEBHOOK_STUDIO; 
 
     if ($type === 'update') {
         $color = "#FFD700"; 
@@ -202,22 +205,17 @@ function sendSlackNotification($type, $name, $comp, $id, $pkg, $date, $opts = '-
 }
 
 // -----------------------------------------------------------------
-// [함수] 알리고 SMS 발송
+// [함수] 알리고 SMS 발송 (secrets.php 상수 사용)
 // -----------------------------------------------------------------
 function sendAligoSMS($receiver, $destination, $msg) {
-    $sms_config = [
-        'userid' => 'griff261',
-        'key'    => '5o4amu1n07weck1mof53q9lc026fwkvu',
-        'sender' => '02-326-3701',
-    ];
-
     $sms_url = "https://apis.aligo.in/send/"; 
     $receiver = str_replace("-", "", $receiver);
 
+    // ★ secrets.php에 정의된 상수 사용
     $_POST_DATA = [
-        'key'      => $sms_config['key'],
-        'userid'   => $sms_config['userid'],
-        'sender'   => $sms_config['sender'],
+        'key'      => ALIGO_API_KEY,    
+        'userid'   => ALIGO_USER_ID,    
+        'sender'   => ALIGO_SENDER,     
         'receiver' => $receiver,
         'msg'      => $msg,
         'msg_type' => 'LMS'

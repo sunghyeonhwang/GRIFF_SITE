@@ -1,10 +1,10 @@
 <?php
-// [1. DB 연결 설정]
-require_once $_SERVER['DOCUMENT_ROOT'] . '/inc/db_connect.php'; // DB 연결 공통 파일 사용 권장 (또는 기존 코드 유지)
-require_once $_SERVER['DOCUMENT_ROOT'] . '/inc/secrets.php'; // ★ 비밀 설정 로드
+// [1. DB 연결 및 설정 로드]
+require_once $_SERVER['DOCUMENT_ROOT'] . '/inc/db_connect.php'; // DB 연결
+require_once $_SERVER['DOCUMENT_ROOT'] . '/inc/secrets.php'; // ★ Secrets 로드
 
 // [2. Google reCAPTCHA 검증]
-$recaptcha_secret = RECAPTCHA_SECRET_KEY; // ★ 상수 사용
+$recaptcha_secret = RECAPTCHA_SECRET_KEY; // secrets.php 상수 사용
 $recaptcha_response = $_POST['g-recaptcha-response'];
 
 if (empty($recaptcha_response)) {
@@ -48,11 +48,15 @@ $subject = "홈페이지 프로젝트 문의 (" . $name . ")";
 $ip_address = $_SERVER['REMOTE_ADDR'];
 
 // [4. DB 입력]
-// (만약 위에서 db_connect.php를 안 썼다면 기존 PDO 연결 코드 사용)
 if (!isset($conn)) {
-    $host = 'localhost'; $user = 'griffhq'; $pass = 'Good121930!@'; $dbName = 'griffhq'; 
-    try { $conn = new PDO("mysql:host=$host;dbname=$dbName;charset=utf8", $user, $pass); } 
-    catch(PDOException $e) { die("DB Error"); }
+    // db_connect.php가 없거나 로드 안 된 경우 대비 (보통은 위 require_once에서 로드됨)
+    try {
+        $dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8";
+        $conn = new PDO($dsn, DB_USER, DB_PASS);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch(PDOException $e) {
+        die("DB Connection Error");
+    }
 }
 
 $sql = "INSERT INTO inquiries (name, email, phone, company, subject, message, status, ip_address, created_at) 
@@ -94,9 +98,9 @@ function sendAligoSMS($receiver, $destination, $msg) {
     $receiver = str_replace("-", "", $receiver);
 
     $_POST_DATA = [
-        'key'      => ALIGO_API_KEY,    // ★ 상수 사용
-        'userid'   => ALIGO_USER_ID,    // ★ 상수 사용
-        'sender'   => ALIGO_SENDER,     // ★ 상수 사용
+        'key'      => ALIGO_API_KEY,    // secrets.php 상수
+        'userid'   => ALIGO_USER_ID,    // secrets.php 상수
+        'sender'   => ALIGO_SENDER,     // secrets.php 상수
         'receiver' => $receiver,
         'msg'      => $msg,
         'msg_type' => 'LMS'
@@ -116,7 +120,7 @@ function sendAligoSMS($receiver, $destination, $msg) {
 // [함수] 슬랙 알림 (secrets.php 상수 사용)
 // =================================================================
 function sendSlackNotification($name, $phone, $email, $budget, $message) {
-    $webhook_url = SLACK_WEBHOOK_CONTACT; // ★ 상수 사용
+    $webhook_url = SLACK_WEBHOOK_CONTACT; // secrets.php 상수
 
     $payload = [
         "text" => "📨 *새로운 프로젝트 문의가 도착했습니다!*",
