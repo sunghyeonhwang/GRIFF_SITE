@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 require_once '../inc/db_connect.php';
 
 // =================================================================
-// [A] 상태 변경 로직 (SMS + Slack 추가됨)
+// [A] 상태 변경 로직
 // =================================================================
 if (isset($_POST['mode']) && $_POST['mode'] === 'update_status') {
     $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
@@ -14,7 +14,7 @@ if (isset($_POST['mode']) && $_POST['mode'] === 'update_status') {
     $allowed = ['pending', 'reviewing', 'interview', 'hired', 'rejected'];
 
     if ($id > 0 && in_array($status, $allowed, true)) {
-        // 1. 지원자 정보 먼저 조회 (문자/슬랙 발송용)
+        // 1. 지원자 정보 조회
         $stmt_info = $pdo->prepare("SELECT a.name, a.phone, r.title as job_title FROM applicants a LEFT JOIN recruits r ON a.recruit_id = r.id WHERE a.id = ?");
         $stmt_info->execute([$id]);
         $applicant = $stmt_info->fetch(PDO::FETCH_ASSOC);
@@ -24,7 +24,7 @@ if (isset($_POST['mode']) && $_POST['mode'] === 'update_status') {
             $stmt = $pdo->prepare("UPDATE applicants SET status = ? WHERE id = ?");
             $stmt->execute([$status, $id]);
 
-            // 3. 상태별 한글 명칭 및 메시지 설정
+            // 3. 메시지 설정
             $status_kor = "";
             $sms_msg = "";
             
@@ -45,17 +45,17 @@ if (isset($_POST['mode']) && $_POST['mode'] === 'update_status') {
                     $status_kor = "불합격";
                     $sms_msg = "[GRIFF 채용]\n{$applicant['name']}님, 아쉽게도 이번 채용에서는 모시지 못하게 되었습니다.\n지원해 주셔서 진심으로 감사드립니다.";
                     break;
-                default: // pending 등
+                default:
                     $status_kor = "서류접수";
                     break;
             }
 
-            // 4. 알리고 문자 발송 (상태가 변경되고 메시지가 있을 경우만)
+            // 4. 문자 발송
             if (!empty($sms_msg)) {
                 sendAligoSMS($applicant['phone'], $applicant['name'], $sms_msg);
             }
 
-            // 5. 슬랙 알림 발송
+            // 5. 슬랙 발송
             sendSlackRecruitNotification($applicant['name'], $applicant['job_title'], $status_kor);
         }
     }
@@ -64,65 +64,46 @@ if (isset($_POST['mode']) && $_POST['mode'] === 'update_status') {
     exit;
 }
 
-// [B] 삭제 로직
+// [B] 삭제 로직 (GET 요청 처리)
 if (isset($_GET['mode']) && $_GET['mode'] === 'delete' && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
     if ($id > 0) {
+        // 프로필 이미지나 첨부파일 삭제 로직이 필요하다면 여기에 추가
         $pdo->prepare("DELETE FROM applicants WHERE id = ?")->execute([$id]);
     }
-    header('Location: applicant_list.php');
+    echo "<script>alert('삭제되었습니다.'); location.href='applicant_list.php';</script>";
     exit;
 }
 
 // =================================================================
-// [함수 1] 알리고 SMS 발송
+// [함수] 알리고 & 슬랙
 // =================================================================
 function sendAligoSMS($receiver, $destination, $msg) {
-    // 알리고 계정 정보
     $sms_config = [
         'userid' => 'griff261',
         'key'    => '5o4amu1n07weck1mof53q9lc026fwkvu',
         'sender' => '02-326-3701',
     ];
-
     $sms_url = "https://apis.aligo.in/send/"; 
-    $receiver = str_replace("-", "", $receiver); // 하이픈 제거
-
+    $receiver = str_replace("-", "", $receiver);
     $_POST_DATA = [
-        'key'      => $sms_config['key'],
-        'userid'   => $sms_config['userid'],
-        'sender'   => $sms_config['sender'],
-        'receiver' => $receiver,
-        'msg'      => $msg,
-        'msg_type' => 'LMS'
+        'key' => $sms_config['key'], 'userid' => $sms_config['userid'], 'sender' => $sms_config['sender'],
+        'receiver' => $receiver, 'msg' => $msg, 'msg_type' => 'LMS'
     ];
-
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $sms_url);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST_DATA);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    $response = curl_exec($ch);
+    curl_exec($ch);
     curl_close($ch);
 }
 
-// =================================================================
-// [함수 2] 슬랙 알림 발송
-// =================================================================
 function sendSlackRecruitNotification($name, $job_title, $status_kor) {
-    // ★ [설정] 채용 알림용 슬랙 웹훅 URL을 입력하세요.
-    $webhook_url = "https://hooks.slack.com/services/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"; 
-
-    $color_map = [
-        '서류검토' => '#F59E0B', // Yellow
-        '면접대기' => '#3B82F6', // Blue
-        '합격' => '#10B981', // Green
-        '불합격' => '#EF4444', // Red
-        '서류접수' => '#6B7280'  // Gray
-    ];
+    $webhook_url = "https://hooks.slack.com/services/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"; 
+    $color_map = ['서류검토'=>'#F59E0B', '면접대기'=>'#3B82F6', '합격'=>'#10B981', '불합격'=>'#EF4444', '서류접수'=>'#6B7280'];
     $color = $color_map[$status_kor] ?? '#000000';
-
     $message = [
         "text" => "👤 *지원자 상태 변경 알림*",
         "attachments" => [[
@@ -136,7 +117,6 @@ function sendSlackRecruitNotification($name, $job_title, $status_kor) {
             "ts" => time()
         ]]
     ];
-
     $ch = curl_init($webhook_url);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($message));
@@ -148,7 +128,7 @@ function sendSlackRecruitNotification($name, $job_title, $status_kor) {
 
 require_once '../inc/admin_header.php';
 
-// [C] 리스트 조회 로직
+// [C] 조회 로직
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $job_filter = isset($_GET['recruit_id']) ? $_GET['recruit_id'] : 'All';
 $recruit_list = $pdo->query("SELECT id, title FROM recruits ORDER BY id DESC")->fetchAll();
@@ -193,42 +173,85 @@ $applicants = $stmt->fetchAll();
     <div class="space-y-4">
         <?php if (count($applicants) > 0): ?>
             <?php foreach ($applicants as $row): ?>
-            <div class="bg-white rounded-xl border border-gray-200 p-5 flex flex-col md:flex-row items-center hover:shadow-md transition cursor-pointer group" onclick="openModal(<?php echo $row['id']; ?>)">
-                <div class="flex items-center w-full md:w-1/2 mb-4 md:mb-0">
-                    <div class="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center mr-4 shrink-0 overflow-hidden relative">
+                <?php
+                    // 3, 4, 5번 요청: 상태별 배경색 및 투명도 설정
+                    $row_class = "bg-white border-gray-200 hover:shadow-md"; // 기본
+                    
+                    if ($row['status'] == 'rejected') {
+                        // 불합격: 회색 + 오퍼시티 60%
+                        $row_class = "bg-gray-100 border-gray-200 opacity-60 grayscale"; 
+                    } elseif ($row['status'] == 'interview') {
+                        // 면접대기: 파란색 배경
+                        $row_class = "bg-blue-50 border-blue-100 hover:shadow-md"; 
+                    } elseif ($row['status'] == 'hired') {
+                        // 합격: 민트색(Emerald) 배경
+                        $row_class = "bg-emerald-50 border-emerald-100 hover:shadow-md"; 
+                    }
+                ?>
+            
+            <div class="<?php echo $row_class; ?> rounded-xl border p-5 flex flex-col md:flex-row items-center transition cursor-pointer group relative" onclick="openModal(<?php echo $row['id']; ?>)">
+                
+                <div class="flex items-center w-full md:w-3/5 mb-4 md:mb-0">
+                    <div class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center mr-5 shrink-0 overflow-hidden relative shadow-sm">
                         <?php if(!empty($row['profile_image'])): ?>
-                            <img src="<?php echo htmlspecialchars($row['profile_image']); ?>" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-lg font-bold text-gray-400 absolute inset-0 hidden items-center justify-center bg-gray-100"><?php echo strtoupper(mb_substr($row['name'], 0, 1)); ?></span>
+                            <img src="<?php echo htmlspecialchars($row['profile_image']); ?>" class="w-full h-full object-cover">
                         <?php else: ?>
                             <span class="text-lg font-bold text-gray-400"><?php echo strtoupper(mb_substr($row['name'], 0, 1)); ?></span>
                         <?php endif; ?>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-gray-900"><?php echo htmlspecialchars($row['name']); ?></h3>
-                        <p class="text-xs text-blue-600 font-medium mt-0.5"><?php echo htmlspecialchars($row['job_title']); ?></p>
-                        <div class="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                            <span class="flex items-center"><i data-lucide="mail" class="w-3 h-3 mr-1"></i> <?php echo htmlspecialchars($row['email']); ?></span>
-                            <span class="hidden sm:flex items-center"><i data-lucide="phone" class="w-3 h-3 mr-1"></i> <?php echo htmlspecialchars($row['phone']); ?></span>
+
+                    <div class="flex flex-col">
+                        <span class="text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-0.5">
+                            <?php echo htmlspecialchars($row['job_title']); ?>
+                        </span>
+                        
+                        <div class="flex items-center gap-3">
+                            <h3 class="font-bold text-lg text-gray-900"><?php echo htmlspecialchars($row['name']); ?></h3>
+                            
+                            <span class="w-px h-3 bg-gray-300 hidden sm:block"></span>
+                            
+                            <div class="flex items-center gap-3 text-xs text-gray-500 font-medium">
+                                <span class="flex items-center"><?php echo htmlspecialchars($row['phone']); ?></span>
+                                <span class="w-px h-2 bg-gray-300 hidden sm:block"></span>
+                                <span class="flex items-center"><?php echo htmlspecialchars($row['email']); ?></span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="w-full md:w-1/2 flex items-center justify-between md:justify-end gap-6">
-                    <div class="text-right hidden sm:block"><p class="text-xs text-gray-400"><?php echo date("Y-m-d", strtotime($row['applied_at'])); ?></p></div>
+                <div class="w-full md:w-2/5 flex items-center justify-between md:justify-end gap-4 pl-4 border-t md:border-t-0 md:border-l border-gray-100 md:border-transparent pt-4 md:pt-0">
+                    
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[10px] text-gray-400 uppercase font-bold">Applied Date</p>
+                        <p class="text-xs text-gray-600 font-medium"><?php echo date("Y-m-d", strtotime($row['applied_at'])); ?></p>
+                    </div>
+
                     <?php
+                        // 상태 뱃지 스타일
                         $status_badges = [
                             'pending' => ['text'=>'서류접수', 'class'=>'bg-gray-100 text-gray-600'],
-                            'reviewing' => ['text'=>'서류검토', 'class'=>'bg-yellow-50 text-yellow-600 border border-yellow-100'],
-                            'interview' => ['text'=>'면접대기', 'class'=>'bg-blue-50 text-blue-600 border border-blue-100'],
-                            'hired' => ['text'=>'합격', 'class'=>'bg-green-50 text-green-600 border border-green-100'],
-                            'rejected' => ['text'=>'불합격', 'class'=>'bg-red-50 text-red-600 border border-red-100'],
+                            'reviewing' => ['text'=>'서류검토', 'class'=>'bg-yellow-100 text-yellow-700'],
+                            'interview' => ['text'=>'면접대기', 'class'=>'bg-blue-100 text-blue-700'],
+                            'hired' => ['text'=>'합격', 'class'=>'bg-green-100 text-green-700'],
+                            'rejected' => ['text'=>'불합격', 'class'=>'bg-red-100 text-red-700'],
                         ];
                         $badge = $status_badges[$row['status']] ?? $status_badges['pending'];
                     ?>
-                    <span id="status-badge-<?php echo $row['id']; ?>" class="px-3 py-1 rounded-full text-xs font-bold <?php echo $badge['class']; ?>">
+                    <span id="status-badge-<?php echo $row['id']; ?>" class="px-3 py-1 rounded-full text-xs font-bold <?php echo $badge['class']; ?> whitespace-nowrap shadow-sm">
                         <?php echo $badge['text']; ?>
                     </span>
-                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition"><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
+
+                    <div class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white group-hover:border-black transition shrink-0">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </div>
+
+                    <a href="?mode=delete&id=<?php echo $row['id']; ?>" 
+                       onclick="event.stopPropagation(); return confirm('정말 이 지원자를 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.');"
+                       class="w-8 h-8 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition shrink-0 ml-2" 
+                       title="Delete Applicant">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </a>
+
                 </div>
             </div>
             <?php endforeach; ?>
@@ -254,17 +277,15 @@ $applicants = $stmt->fetchAll();
     // 상태 설정값
     const statusConfig = {
         'pending': { text: '서류접수', class: 'bg-gray-100 text-gray-600' },
-        'reviewing': { text: '서류검토', class: 'bg-yellow-50 text-yellow-600 border border-yellow-100' },
-        'interview': { text: '면접대기', class: 'bg-blue-50 text-blue-600 border border-blue-100' },
-        'hired': { text: '합격', class: 'bg-green-50 text-green-600 border border-green-100' },
-        'rejected': { text: '불합격', class: 'bg-red-50 text-red-600 border border-red-100' }
+        'reviewing': { text: '서류검토', class: 'bg-yellow-100 text-yellow-700' },
+        'interview': { text: '면접대기', class: 'bg-blue-100 text-blue-700' },
+        'hired': { text: '합격', class: 'bg-green-100 text-green-700' },
+        'rejected': { text: '불합격', class: 'bg-red-100 text-red-700' }
     };
 
-    // 모달 열기
     function openModal(id) {
         document.getElementById('applicantModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
-
         const timestamp = new Date().getTime();
         fetch('ajax_applicant_view.php?id=' + id + '&t=' + timestamp)
             .then(response => response.text())
@@ -274,14 +295,12 @@ $applicants = $stmt->fetchAll();
             });
     }
 
-    // 모달 닫기
     function closeModal() {
         document.getElementById('applicantModal').classList.add('hidden');
         document.body.style.overflow = 'auto';
         document.getElementById('modalContent').innerHTML = '<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>';
     }
 
-    // 탭 전환
     function switchTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('text-black', 'border-b-2', 'border-black');
@@ -292,54 +311,41 @@ $applicants = $stmt->fetchAll();
             activeBtn.classList.remove('text-gray-400');
             activeBtn.classList.add('text-black', 'border-b-2', 'border-black');
         }
-
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.add('hidden');
-        });
+        document.querySelectorAll('.tab-content').forEach(content => { content.classList.add('hidden'); });
         const activeContent = document.getElementById('tab_content_' + tabName);
         if(activeContent) activeContent.classList.remove('hidden');
     }
 
-    // 상태 업데이트
     function updateStatus(id, status) {
         if(!confirm('상태를 변경하시겠습니까?')) return;
-
         const formData = new FormData();
         formData.append('mode', 'update_status');
         formData.append('id', id);
         formData.append('status', status);
 
-        fetch('applicant_list.php', {
-            method: 'POST',
-            body: formData
-        })
+        fetch('applicant_list.php', { method: 'POST', body: formData })
         .then(response => response.text())
         .then(result => {
             if(result.trim() === 'OK') {
                 openModal(id);
+                // 리스트 화면의 배지도 업데이트
                 const badge = document.getElementById('status-badge-' + id);
                 if(badge && statusConfig[status]) {
-                    badge.className = `px-3 py-1 rounded-full text-xs font-bold ${statusConfig[status].class}`;
+                    badge.className = `px-3 py-1 rounded-full text-xs font-bold ${statusConfig[status].class} whitespace-nowrap shadow-sm`;
                     badge.innerText = statusConfig[status].text;
                 }
+                // 배경색 업데이트를 위해 리로드 (선택사항)
+                location.reload(); 
             }
         });
     }
 
-    // ----------------------------------------------------
-    // ★ 여기로 이동된 스케줄 관련 함수들
-    // ----------------------------------------------------
-    
-    // 1. 스케줄 입력 폼 토글
     function toggleSchedule() {
         const form = document.getElementById('schedule-form');
         const btn = document.getElementById('btn-schedule');
-        
         if (form.classList.contains('hidden')) {
             form.classList.remove('hidden');
             btn.classList.add('hidden');
-            
-            // 기본값: 현재시간 + 24시간
             const now = new Date();
             now.setDate(now.getDate() + 1);
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -350,28 +356,18 @@ $applicants = $stmt->fetchAll();
         }
     }
 
-    // 2. 구글 캘린더 열기 (Hidden Input에서 값 읽기)
     function openGoogleCalendar() {
-        // 모달 안에 숨겨둔 input 값들 가져오기
         const appName = document.getElementById('cal-name').value;
         const appJob = document.getElementById('cal-job').value;
         const appEmail = document.getElementById('cal-email').value;
         const appPhone = document.getElementById('cal-phone').value;
         const appLink = document.getElementById('cal-link').value;
-        
         const dateInput = document.getElementById('interview-date').value;
-        if (!dateInput) {
-            alert('Please select a date and time.');
-            return;
-        }
+        if (!dateInput) { alert('Please select a date and time.'); return; }
 
         const startDate = new Date(dateInput);
-        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1시간
-
-        const formatTime = (date) => {
-            return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
-        };
-
+        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+        const formatTime = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
         const startStr = formatTime(startDate);
         const endStr = formatTime(endDate);
 
@@ -381,7 +377,6 @@ $applicants = $stmt->fetchAll();
         const guestEmail = appEmail;
 
         const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}&add=${encodeURIComponent(guestEmail)}`;
-
         window.open(url, '_blank');
     }
 </script>
