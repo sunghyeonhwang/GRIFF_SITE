@@ -1,0 +1,19 @@
+{
+    "host": "griffhq.mycafe24.com",
+    "username": "griffhq",
+    "password": "Good121930!@",
+    "remotePath": "/www/",
+    "protocol": "ftp",
+    "port": 21,
+    "fileNameEncoding": "utf8",
+    "autoUpload": true,
+    "autoDelete": false,
+    "autoDownload": true,
+    "ignore": [
+        ".git",
+        "/.vscode",
+        "/phpMyAdmin",
+        "phpmyadmin"
+    ],
+    "ignoreWrongFileEncoding": true
+}

@@ -1,0 +1,62 @@
+/* font */
+
+/* 1. 기본 영문 폰트 (URWDIN) */
+@font-face {
+    font-family: 'URWDIN';
+	font-style: normal;
+	font-weight: 200;
+    src: url('font/URWDIN-Light.woff2') format('woff2'),
+		 url('font/URWDIN-Light.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'URWDIN';
+	font-style: normal;
+	font-weight: normal;
+    src: url('font/URWDIN-Medium.woff2') format('woff2'),
+		 url('font/URWDIN-Medium.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'URWDIN';
+	font-style: normal;
+	font-weight: bold;
+    src: url('font/URWDIN-Bold.woff2') format('woff2'),
+		 url('font/URWDIN-Bold.woff') format('woff');
+}
+
+/* 2. 기본 한글 폰트 (Freesentation) */
+@font-face {
+    font-family: 'Freesentation';
+	font-style: normal;
+	font-weight: 200;
+    src: url('font/Freesentation-3Light.woff2') format('woff2'),
+		 url('font/Freesentation-3Light.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Freesentation';
+	font-style: normal;
+	font-weight: normal;
+    src: url('font/Freesentation-5Medium.woff2') format('woff2'),
+		 url('font/Freesentation-5Medium.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Freesentation';
+	font-style: normal;
+	font-weight: bold;
+    src: url('font/Freesentation-7Bold.woff2') format('woff2'),
+		 url('font/Freesentation-7Bold.woff') format('woff');
+}
+
+/* 3. 포인트 폰트 (BOLD 부분용) */
+/* Sacramento는 구글 폰트로 로드하므로 삭제했습니다. */
+
+@font-face {
+    font-family: 'SuperbusyActivity';
+    font-style: normal;
+    font-weight: normal;
+    src: url('font/SuperbusyActivity-Outline.woff2') format('woff2'),
+         url('font/SuperbusyActivity-Outline.woff') format('woff');
+}

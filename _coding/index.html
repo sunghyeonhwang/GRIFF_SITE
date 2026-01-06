@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRIFF Studio - Interaction</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&display=swap');
+        
+        @font-face {
+            font-family: 'Freesentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2202@1.0/Freesentation-7Bold.woff') format('woff');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Freesentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2202@1.0/Freesentation-4Regular.woff') format('woff');
+            font-weight: 400;
+        }
+
+        body { font-family: 'Freesentation', 'Inter', sans-serif; }
+        
+        /* 스크롤바 숨김 (깔끔한 느낌을 위해) */
+        body::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* 텍스트 앤티앨리어싱 */
+        .smooth-text { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
+</head>
+<body class="bg-[#Fdfdfd] text-gray-900">
+
+    <nav class="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center mix-blend-difference text-white">
+        <a href="#" class="text-2xl font-bold tracking-tighter uppercase">Griff</a>
+        <div class="hidden md:flex space-x-8 text-sm font-medium tracking-wide">
+            <a href="#" class="hover:opacity-70 transition">Work</a>
+            <a href="#" class="hover:opacity-70 transition">About</a>
+            <a href="#" class="bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition">Beta</a>
+        </div>
+    </nav>
+
+    <section class="h-screen w-full flex flex-col justify-center items-center text-center px-4 pt-20">
+        <p class="text-sm font-medium text-gray-500 mb-6 uppercase tracking-widest animate-fade-in">The Creative Studio</p>
+        <h1 class="text-[12vw] leading-[0.9] font-bold tracking-tighter mb-10 text-black">
+            Say hello<br>to GRIFF
+        </h1>
+        <div class="animate-bounce mt-10">
+            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+    </section>
+
+    <section id="sticky-container" class="relative w-full flex flex-col md:flex-row bg-black text-white">
+        
+        <div class="w-full md:w-1/2 z-10 relative">
+            
+            <div class="h-screen flex flex-col justify-center px-10 md:px-20 step" data-video="vid1">
+                <span class="text-yellow-400 text-sm font-bold tracking-widest uppercase mb-4">Mundane made magic</span>
+                <h2 class="text-5xl md:text-7xl font-bold leading-tight mb-6">
+                    평범한 일상을<br>마법처럼.
+                </h2>
+                <p class="text-lg text-gray-400 leading-relaxed max-w-md">
+                    GRIFF는 단순한 디자인을 넘어 경험을 설계합니다.<br>
+                    사용자의 손끝에서 시작되는 직관적인 인터랙션을 만나보세요.
+                </p>
+            </div>
+
+            <div class="h-screen flex flex-col justify-center px-10 md:px-20 step" data-video="vid2">
+                <span class="text-green-400 text-sm font-bold tracking-widest uppercase mb-4">Design for Real Use</span>
+                <h2 class="text-5xl md:text-7xl font-bold leading-tight mb-6">
+                    실생활에 녹아드는<br>디자인.
+                </h2>
+                <p class="text-lg text-gray-400 leading-relaxed max-w-md">
+                    보기에만 좋은 것이 아닙니다.<br>
+                    실제 환경에서 가장 빛나는 실용적인 아름다움을 추구합니다.
+                </p>
+            </div>
+
+            <div class="h-screen flex flex-col justify-center px-10 md:px-20 step" data-video="vid3">
+                <span class="text-blue-400 text-sm font-bold tracking-widest uppercase mb-4">Always Learning</span>
+                <h2 class="text-5xl md:text-7xl font-bold leading-tight mb-6">
+                    스스로 진화하는<br>시스템.
+                </h2>
+                <p class="text-lg text-gray-400 leading-relaxed max-w-md">
+                    우리의 프로젝트는 멈춰있지 않습니다.<br>
+                    데이터를 통해 매일 더 똑똑해지고 새로워집니다.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="w-full md:w-1/2 h-screen sticky top-0 flex items-center justify-center overflow-hidden bg-[#111]">
+            
+            <video id="vid1" class="absolute w-full h-full object-cover transition-opacity duration-1000 opacity-100" autoplay loop muted playsinline>
+                <source src="https://videos.pexels.com/video-files/8473659/8473659-uhd_2560_1440_25fps.mp4" type="video/mp4">
+            </video>
+            
+            <video id="vid2" class="absolute w-full h-full object-cover transition-opacity duration-1000 opacity-0" autoplay loop muted playsinline>
+                <source src="https://videos.pexels.com/video-files/7578544/7578544-uhd_2560_1440_30fps.mp4" type="video/mp4">
+            </video>
+
+            <video id="vid3" class="absolute w-full h-full object-cover transition-opacity duration-1000 opacity-0" autoplay loop muted playsinline>
+                <source src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_24fps.mp4" type="video/mp4">
+            </video>
+            
+            <div class="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent md:from-black/80"></div>
+        </div>
+
+    </section>
+
+    <section class="py-32 bg-[#F6F6F4]">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-4xl md:text-6xl font-bold mb-12">Designed for Impact</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="aspect-[4/5] bg-gray-200 rounded-2xl overflow-hidden group relative">
+                    <img src="https://images.unsplash.com/photo-1593720213428-28a5b9e94613?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-end p-6 opacity-0 group-hover:opacity-100 transition duration-300 bg-black/20">
+                        <span class="text-white font-bold text-xl">Web Experience</span>
+                    </div>
+                </div>
+                <div class="aspect-[4/5] bg-gray-200 rounded-2xl overflow-hidden group relative mt-0 md:mt-16">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                     <div class="absolute inset-0 flex items-end p-6 opacity-0 group-hover:opacity-100 transition duration-300 bg-black/20">
+                        <span class="text-white font-bold text-xl">Brand Identity</span>
+                    </div>
+                </div>
+                <div class="aspect-[4/5] bg-gray-200 rounded-2xl overflow-hidden group relative">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2670&auto=format&fit=crop" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                     <div class="absolute inset-0 flex items-end p-6 opacity-0 group-hover:opacity-100 transition duration-300 bg-black/20">
+                        <span class="text-white font-bold text-xl">Product Design</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-black text-white py-20 text-center">
+        <p class="text-gray-500 text-sm">© 2026 GRIFF Studio. All rights reserved.</p>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // [핵심] Sticky Video Transition Logic
+        // 왼쪽 텍스트 섹션(.step)이 화면 중앙에 올 때, 해당하는 비디오를 보여줌
+        const steps = document.querySelectorAll(".step");
+        const videos = document.querySelectorAll("video");
+
+        steps.forEach((step, i) => {
+            ScrollTrigger.create({
+                trigger: step,
+                start: "top center", // 섹션의 상단이 화면 중앙에 올 때
+                end: "bottom center", // 섹션의 하단이 화면 중앙을 지날 때
+                onEnter: () => changeVideo(step.dataset.video),
+                onEnterBack: () => changeVideo(step.dataset.video),
+                // Markers는 개발할 때만 true로 켜서 확인하세요
+                markers: false 
+            });
+        });
+
+        function changeVideo(id) {
+            // 모든 비디오 투명하게 (숨김)
+            videos.forEach(v => v.classList.remove("opacity-100"));
+            videos.forEach(v => v.classList.add("opacity-0"));
+
+            // 선택된 비디오만 보이게
+            const activeVideo = document.getElementById(id);
+            if(activeVideo) {
+                activeVideo.classList.remove("opacity-0");
+                activeVideo.classList.add("opacity-100");
+                // 영상이 멈춰있을 수 있으니 재생 보장
+                activeVideo.play(); 
+            }
+        }
+
+        // 텍스트 등장 애니메이션 (부드럽게 위로 올라오면서 등장)
+        gsap.utils.toArray(".step h2, .step p").forEach(elem => {
+            gsap.from(elem, {
+                scrollTrigger: {
+                    trigger: elem,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                ease: "power3.out"
+            });
+        });
+
+    </script>
+</body>
+</html>

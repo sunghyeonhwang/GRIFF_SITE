@@ -1,0 +1,151 @@
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+    /* Scoped Styles for Project Content */
+    .custom-project-layout {
+        font-family: 'Noto Sans KR', sans-serif;
+        line-height: 1.7;
+        color: #333;
+        background-color: #f9f9f9;
+        overflow: hidden; /* Prevent horizontal scroll */
+    }
+    .custom-project-layout * { box-sizing: border-box; }
+    .custom-project-layout img { width: 100%; height: auto; display: block; object-fit: cover; }
+    .custom-project-layout h1, .custom-project-layout h2, .custom-project-layout h3 { font-family: 'Playfair Display', serif; color: #111; margin-top: 0; }
+
+    .custom-project-layout .inner-container {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 20px;
+        background-color: #fff;
+    }
+    .custom-project-layout .section-padding { padding: 60px 0; }
+    .custom-project-layout .text-center { text-align: center; }
+    .custom-project-layout .mb-4 { margin-bottom: 2rem; }
+
+    /* Hero */
+    .custom-project-layout .hero-header { padding: 80px 0 40px; }
+    .custom-project-layout .hero-title { font-size: 3.5rem; font-weight: 700; margin-bottom: 20px; line-height: 1.2; }
+    .custom-project-layout .hero-subtitle { font-size: 1.2rem; color: #666; margin-bottom: 40px; font-style: italic; }
+    .custom-project-layout .hero-image-frame { height: 60vh; overflow: hidden; }
+
+    /* Intro */
+    .custom-project-layout .intro-text { max-width: 700px; margin: 0 auto; font-size: 1.1rem; color: #555; }
+    .custom-project-layout .intro-text p:first-of-type::first-letter {
+        font-family: 'Playfair Display', serif; font-size: 3.5rem; float: left; line-height: 0.8; margin-right: 10px; color: #111;
+    }
+
+    /* Common Section Styles */
+    .custom-project-layout .cafe-section h2 { font-size: 2rem; margin-bottom: 1rem; }
+    .custom-project-layout .cafe-location { font-size: 0.9rem; color: #888; letter-spacing: 1px; margin-bottom: 1.5rem; display: block; }
+    .custom-project-layout .cafe-description { color: #444; }
+
+    /* Grids */
+    .custom-project-layout .grid-feature { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; }
+    .custom-project-layout .feature-main-img { height: 500px; }
+    .custom-project-layout .feature-detail-img { height: 250px; margin-top: 30px; }
+
+    .custom-project-layout .grid-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .custom-project-layout .gallery-img-frame { height: 400px; }
+    .custom-project-layout .gallery-text { grid-column: 1 / -1; }
+
+    .custom-project-layout .interlude-banner { width: 100%; height: 450px; margin: 60px 0; }
+
+    .custom-project-layout .grid-collage { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .custom-project-layout .collage-tall { grid-row: 1 / 3; height: 100%; min-height: 600px; }
+    .custom-project-layout .collage-stack-img { height: 285px; }
+    .custom-project-layout .collage-text-area { grid-column: 1 / -1; margin-bottom: 30px; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .custom-project-layout .hero-title { font-size: 2.5rem; }
+        .custom-project-layout .hero-image-frame { height: 40vh; }
+        .custom-project-layout .grid-feature, 
+        .custom-project-layout .grid-gallery, 
+        .custom-project-layout .grid-collage { grid-template-columns: 1fr; gap: 20px; }
+        .custom-project-layout .feature-main-img, 
+        .custom-project-layout .gallery-img-frame, 
+        .custom-project-layout .collage-tall, 
+        .custom-project-layout .feature-detail-img, 
+        .custom-project-layout .collage-stack-img { height: 300px; width: 100%; }
+        .custom-project-layout .feature-detail-img { margin-top: 0; }
+        .custom-project-layout .collage-tall { grid-row: auto; }
+        .custom-project-layout .inner-container { padding: 0 15px; }
+    }
+</style>
+
+<div class="custom-project-layout">
+    <div class="inner-container">
+        <header class="hero-header text-center">
+             <div class="hero-image-frame mb-4">
+                <img src="https://source.unsplash.com/1600x900/?tokyo,cafe,interior" alt="Tokyo Cafe">
+            </div>
+            <span class="cafe-location">TOKYO CAFE GUIDE Vol.1</span>
+            <h1 class="hero-title">도쿄의 숨겨진 커피 테이블:<br>공간이 주는 위로</h1>
+            <p class="hero-subtitle">번잡한 도시 속, 고요한 시간을 선물하는 세 곳의 카페</p>
+        </header>
+
+        <section class="section-padding intro-text text-center">
+            <p>도쿄는 끊임없이 움직이는 도시입니다. 수많은 인파와 빌딩 숲 사이에서 때로는 잠시 멈춤 버튼을 누를 공간이 필요합니다. 제가 이번 여행에서 발견한 카페들은 단순한 커피 한 잔 이상의 의미를 가집니다. 주인의 철학이 담긴 인테리어, 창밖으로 보이는 계절의 변화, 그리고 정성스럽게 내려진 커피 한 잔의 여유. 잡지를 넘기듯 편안한 마음으로 도쿄의 감성적인 카페들을 만나보세요.</p>
+        </section>
+
+        <section class="section-padding cafe-section">
+            <div class="grid-feature">
+                <div class="feature-main-img">
+                    <img src="https://source.unsplash.com/800x1000/?coffee,shop,minimal" alt="Cafe Interior">
+                </div>
+                <div>
+                    <h2>01. 키요스미의 정원, 'Koffee Mameya'</h2>
+                    <span class="cafe-location">Kiyosumi-shirakawa, Tokyo</span>
+                    <p class="cafe-description mb-4">미니멀리즘의 극치를 보여주는 공간입니다. 바리스타와 손님 사이의 경계를 허문 낮은 카운터가 인상적이며, 오직 커피의 맛과 향에만 집중할 수 있도록 설계되었습니다. 낡은 목재와 현대적인 콘크리트의 조화가 아름답습니다.</p>
+                    <div class="feature-detail-img">
+                        <img src="https://source.unsplash.com/800x600/?latteart,handdrip" alt="Hand Drip">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-padding cafe-section text-center">
+             <div class="gallery-text mb-4">
+                <h2>02. 나카메구로의 햇살, 'Onibus Coffee'</h2>
+                <span class="cafe-location">Nakameguro, Tokyo</span>
+                <p class="cafe-description intro-text">기찻길 옆 작은 2층 건물 전체가 카페입니다. 2층 창가 자리에 앉으면 벚꽃 나무와 지나가는 전철을 동시에 볼 수 있습니다. 따뜻한 햇살이 가득 들어오는 이곳은 마치 오래된 친구의 다락방에 놀러 온 듯한 포근함을 줍니다.</p>
+            </div>
+            <div class="grid-gallery">
+                <div class="gallery-img-frame">
+                    <img src="https://source.unsplash.com/800x800/?tokyo,street,cafe" alt="Cafe Window">
+                </div>
+                <div class="gallery-img-frame">
+                    <img src="https://source.unsplash.com/800x800/?cozy,cafe,sunlight" alt="Sunlight in Cafe">
+                </div>
+            </div>
+        </section>
+    </div> 
+
+    <div class="interlude-banner">
+        <img src="https://source.unsplash.com/1920x600/?tokyo,cityscape,sunset" alt="Tokyo Sunset">
+    </div>
+
+    <div class="inner-container"> 
+        <section class="section-padding cafe-section">
+            <div class="collage-text-area text-center">
+                <h2>03. 시부야의 숨은 아지트, 'Coffee Supreme'</h2>
+                <span class="cafe-location">Shibuya, Tokyo</span>
+                <p class="cafe-description intro-text">시부야의 번잡함에서 조금 벗어난 언덕길에 위치한 현대적인 카페입니다. 화이트 톤의 깔끔한 인테리어에 레드 포인트가 감각적입니다. 훌륭한 에스프레소 메뉴와 함께 힙한 도쿄 로컬들의 일상을 엿볼 수 있는 곳입니다.</p>
+            </div>
+            <div class="grid-collage">
+                <div class="collage-tall">
+                    <img src="https://source.unsplash.com/600x1200/?modern,cafe,vertical" alt="High Ceiling Cafe">
+                </div>
+                <div>
+                    <div class="collage-stack-img mb-4">
+                        <img src="https://source.unsplash.com/800x600/?espresso,cookie" alt="Espresso">
+                    </div>
+                    <div class="collage-stack-img">
+                        <img src="https://source.unsplash.com/800x600/?barista,working" alt="Barista">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
