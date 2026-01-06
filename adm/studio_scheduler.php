@@ -1,5 +1,5 @@
 <?php
-// 에러 확인용
+// 에러 확인 용
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
