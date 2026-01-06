@@ -34,8 +34,9 @@ if (file_exists("$root/inc/header.php")) require_once "$root/inc/header.php";
         font-family: 'Freesentation', sans-serif;
         font-size: 1.1rem;
         color: #888;
-        margin-top: -0.5rem; /* 타이틀과 가깝게 */
+        margin-top: 0.25rem; /* 타이틀과 가깝게 */
         margin-bottom: 2.5rem;
+        padding-left:0.25rem;
         font-weight: 500;
         display: block;
     }
@@ -298,7 +299,7 @@ if (file_exists("$root/inc/header.php")) require_once "$root/inc/header.php";
         
         <div class="hero-desc-row fade-up">
             <p class="hero-desc">
-                2016년, ‘다르게 생각하는 용기’로 시작한 그리프는 변화를 두려워하지 않는 창의적인 집단입니다.<br class="hidden md:block">
+                2016년, 시작한 그리프는 변화를 두려워하지 않는 창의적인 회사입니다.<br class="hidden md:block">
                 미친 듯이 상상하고, 진심으로 도전하며, 늘 새로운 방법으로 세상을 바라봅니다. <br class="hidden md:block">
                 그리프의 여정은 단순한 마케팅이 아닌, 대담한 이야기와 혁신을 만들어가는 과정입니다.
             </p>

@@ -37,12 +37,30 @@
       "modified": false
     },
     "www": {
+      "..txt": {
+        "type": "-",
+        "size": 0,
+        "lmtime": 0,
+        "modified": false
+      },
+      ".gitignore": {
+        "type": "-",
+        "size": 111,
+        "lmtime": 0,
+        "modified": false
+      },
       "_coding": {},
       "about.php": {
         "type": "-",
+        "size": 15875,
+        "lmtime": 1767700817394.5469,
+        "modified": false
+      },
+      "about_bk.php": {
+        "type": "-",
         "size": 15425,
-        "lmtime": 1767435905958.6975,
-        "modified": true
+        "lmtime": 0,
+        "modified": false
       },
       "adm": {
         "_code": {
@@ -95,6 +113,12 @@
           "lmtime": 1767688669334,
           "modified": false
         },
+        "applicant_list_bk.php": {
+          "type": "-",
+          "size": 20299,
+          "lmtime": 0,
+          "modified": false
+        },
         "blog.html": {
           "type": "-",
           "size": 5063,
@@ -109,9 +133,9 @@
         },
         "dashboard.php": {
           "type": "-",
-          "size": 8810,
+          "size": 8960,
           "lmtime": 1767688873270,
-          "modified": false
+          "modified": true
         },
         "inc": {
           "editor_templates.php": {
@@ -183,8 +207,8 @@
         },
         "studio_scheduler.php": {
           "type": "-",
-          "size": 39093,
-          "lmtime": 1767454769924,
+          "size": 39094,
+          "lmtime": 1767700505174.066,
           "modified": false
         },
         "upload_image.php": {
@@ -337,6 +361,12 @@
           "lmtime": 1767435915188.1206,
           "modified": true
         }
+      },
+      "blog.html": {
+        "type": "-",
+        "size": 9002,
+        "lmtime": 0,
+        "modified": false
       },
       "contact": {
         "contact.php": {
@@ -843,6 +873,12 @@
         "lmtime": 1767451770464,
         "modified": true
       },
+      "index_bk.php": {
+        "type": "-",
+        "size": 21172,
+        "lmtime": 0,
+        "modified": false
+      },
       "phpmyadmin": {},
       "project": {
         "project_list.php": {
@@ -982,6 +1018,12 @@
           "modified": false
         }
       },
+      "test.txt": {
+        "type": "-",
+        "size": 1229,
+        "lmtime": 0,
+        "modified": false
+      },
       "uploads": {
         "recruit": {
           "20260103110224_695878b09f5c6_photo.png": {
@@ -1003,6 +1045,12 @@
             "modified": false
           }
         }
+      },
+      "�� �ؽ�Ʈ ����.txt": {
+        "type": "-",
+        "size": 0,
+        "lmtime": 0,
+        "modified": false
       }
     }
   },
